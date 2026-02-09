@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 Tote Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            padding: 30px;
+            min-height: 400px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .photo-upload-area {
+            border: 3px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        .photo-upload-area:hover {
+            border-color: #667eea;
+            background: #f5f3ff;
+        }
+
+        .photo-upload-area.dragover {
+            border-color: #667eea;
+            background: #f5f3ff;
+        }
+
+        .photo-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .photo-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+
+        .photo-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .tote-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .tote-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tote-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .tote-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .tote-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .tote-location {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .tote-contents {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .tote-photo-count {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+
+        .tote-expanded {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .tote-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tote-photo {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+        }
+
+        .tote-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .qr-code {
+            max-width: 300px;
+            margin: 20px auto;
+            border: 4px solid #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .chevron {
+            transition: transform 0.3s;
+        }
+
+        .chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* Single Tote View (when opening from QR scan) */
+        .single-tote-view {
+            padding: 20px;
+        }
+
+        .single-tote-view .tote-title {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .single-tote-view .info-section {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .single-tote-view .info-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .single-tote-view .info-value {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox.show {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Tote Tracker</h1>
+            <p>Track what's in your storage totes with QR codes</p>
+        </div>
+
+        <div class="card">
+            <div class="tabs" id="main-tabs">
+                <button class="tab active" onclick="switchTab('my-totes')">My Totes</button>
+                <button class="tab" onclick="switchTab('add-tote')">Add Tote</button>
+            </div>
+
+            <div class="tab-content">
+                <!-- My Totes Tab -->
+                <div id="my-totes-content">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" placeholder="Search totes..." onkeyup="searchTotes()">
+                    </div>
+                    <div id="totes-list" class="tote-list"></div>
+                </div>
+
+                <!-- Add Tote Tab -->
+                <div id="add-tote-content" class="hidden">
+                    <form onsubmit="saveTote(event)">
+                        <div class="form-group">
+                            <label>Tote Name *</label>
+                            <input type="text" id="tote-name" placeholder="e.g., Christmas Decorations" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Contents</label>
+                            <textarea id="tote-contents" rows="4" placeholder="What's inside?"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" id="tote-location" placeholder="e.g., Garage, Attic, Basement">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Photos (Optional)</label>
+                            <input type="file" id="photo-input" accept="image/*" multiple style="display: none;" onchange="handlePhotoSelect(event)">
+                            <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()" ondrop="handlePhotoDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                                <div style="font-weight: 600; margin-bottom: 5px;">Click to upload photos</div>
+                                <div style="font-size: 14px; color: #999;">or drag and drop</div>
+                            </div>
+                            <div id="photo-preview" class="photo-preview-grid"></div>
+                        </div>
+
+                        <button type="submit" class="btn" style="width: 100%;">Save & Generate QR Code</button>
+                    </form>
+                </div>
+
+                <!-- Single Tote View (from QR scan) -->
+                <div id="single-tote-content" class="hidden single-tote-view"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox for viewing photos -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <button class="lightbox-close" onclick="closeLightbox()">×</button>
+        <img id="lightbox-img" src="" alt="Full size photo">
+    </div>
+
+    <script>
+        let totes = [];
+        let expandedToteId = null;
+        let tempPhotos = []; // Temporary storage for photos being added
+
+        // Check if viewing a specific tote from QR code
+        function checkForToteParam() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const toteId = urlParams.get('tote');
+            
+            if (toteId) {
+                // Hide tabs and show single tote view
+                document.getElementById('main-tabs').style.display = 'none';
+                displaySingleTote(toteId);
+            } else {
+                loadTotes();
+            }
+        }
+
+        // Display a single tote (from QR scan)
+        function displaySingleTote(toteId) {
+            const tote = totes.find(t => t.id === toteId);
+            const container = document.getElementById('single-tote-content');
+            
+            document.getElementById('my-totes-content').classList.add('hidden');
+            document.getElementById('add-tote-content').classList.add('hidden');
+            container.classList.remove('hidden');
+
+            if (!tote) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <h2>Tote Not Found</h2>
+                        <p>This tote doesn't exist or has been deleted.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="tote-title">${tote.name}</div>
+                
+                ${tote.location ? `
+                    <div class="info-section">
+                        <div class="info-label">📍 Location</div>
+                        <div class="info-value">${tote.location}</div>
+                    </div>
+                ` : ''}
+                
+                ${tote.contents ? `
+                    <div class="info-section">
+                        <div class="info-label">📝 Contents</div>
+                        <div class="info-value">${tote.contents}</div>
+                    </div>
+                ` : ''}
+                
+                ${tote.photos && tote.photos.length > 0 ? `
+                    <div class="info-section">
+                        <div class="info-label">📷 Photos (${tote.photos.length})</div>
+                        <div class="tote-photos-grid" style="margin-top: 15px;">
+                            ${tote.photos.map((photo, idx) => `
+                                <div class="tote-photo" onclick="openLightbox('${photo}')">
+                                    <img src="${photo}" alt="Photo ${idx + 1}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Load totes from browser storage
+        function loadTotes() {
+            const saved = localStorage.getItem('totes');
+            if (saved) {
+                totes = JSON.parse(saved);
+            }
+            displayTotes();
+        }
+
+        // Save totes to browser storage
+        function saveTotesToStorage() {
+            localStorage.setItem('totes', JSON.stringify(totes));
+        }
+
+        // Generate QR code URL that links to the tote
+        function generateQRCode(toteId) {
+            // This will be the URL when hosted online
+            const baseUrl = window.location.origin + window.location.pathname;
+            const toteUrl = `${baseUrl}?tote=${toteId}`;
+            return `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(toteUrl)}`;
+        }
+
+        // Handle photo selection
+        function handlePhotoSelect(event) {
+            const files = Array.from(event.target.files);
+            processPhotos(files);
+        }
+
+        // Handle photo drag and drop
+        function handlePhotoDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            const files = Array.from(event.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            processPhotos(files);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        // Process and preview photos
+        function processPhotos(files) {
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempPhotos.push(e.target.result);
+                    displayPhotoPreview();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Display photo preview
+        function displayPhotoPreview() {
+            const preview = document.getElementById('photo-preview');
+            preview.innerHTML = tempPhotos.map((photo, idx) => `
+                <div class="photo-preview-item">
+                    <img src="${photo}" alt="Preview ${idx + 1}">
+                    <button class="photo-remove-btn" onclick="removePhoto(${idx})" type="button">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Remove photo from preview
+        function removePhoto(index) {
+            tempPhotos.splice(index, 1);
+            displayPhotoPreview();
+        }
+
+        // Switch between tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            document.getElementById('my-totes-content').classList.add('hidden');
+            document.getElementById('add-tote-content').classList.add('hidden');
+            
+            if (tabName === 'my-totes') {
+                document.getElementById('my-totes-content').classList.remove('hidden');
+            } else {
+                document.getElementById('add-tote-content').classList.remove('hidden');
+            }
+        }
+
+        // Save a new tote
+        function saveTote(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('tote-name').value.trim();
+            const contents = document.getElementById('tote-contents').value.trim();
+            const location = document.getElementById('tote-location').value.trim();
+
+            if (!name) {
+                alert('Please enter a tote name');
+                return;
+            }
+
+            const toteId = Date.now().toString();
+            const newTote = {
+                id: toteId,
+                name: name,
+                contents: contents,
+                location: location,
+                photos: [...tempPhotos],
+                qrCode: generateQRCode(toteId),
+                createdAt: new Date().toISOString()
+            };
+
+            totes.unshift(newTote);
+            saveTotesToStorage();
+
+            // Clear form
+            document.getElementById('tote-name').value = '';
+            document.getElementById('tote-contents').value = '';
+            document.getElementById('tote-location').value = '';
+            tempPhotos = [];
+            displayPhotoPreview();
+
+            // Switch to My Totes tab and expand the new tote
+            expandedToteId = toteId;
+            switchTab('my-totes');
+            document.querySelectorAll('.tab')[0].classList.add('active');
+            document.querySelectorAll('.tab')[1].classList.remove('active');
+            displayTotes();
+
+            alert('Tote created! Click on it to see and download the QR code.');
+        }
+
+        // Display all totes
+        function displayTotes(filteredTotes = null) {
+            const totesList = document.getElementById('totes-list');
+            const totesToDisplay = filteredTotes || totes;
+
+            if (totesToDisplay.length === 0) {
+                totesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📦</div>
+                        <p style="font-size: 1.2em; margin-bottom: 10px;">No totes yet</p>
+                        <p style="margin-bottom: 20px;">Add your first tote to get started!</p>
+                        <button class="btn" onclick="switchTab('add-tote'); document.querySelectorAll('.tab')[1].click();">Add Tote</button>
+                    </div>
+                `;
+                return;
+            }
+
+            totesList.innerHTML = totesToDisplay.map(tote => `
+                <div class="tote-item" onclick="toggleTote('${tote.id}')">
+                    <div class="tote-header">
+                        <div style="flex: 1;">
+                            <div class="tote-title">${tote.name}</div>
+                            ${tote.location ? `<div class="tote-location">📍 ${tote.location}</div>` : ''}
+                            ${tote.contents ? `<div class="tote-contents">${tote.contents}</div>` : ''}
+                            ${tote.photos && tote.photos.length > 0 ? `
+                                <span class="tote-photo-count">📷 ${tote.photos.length} photo${tote.photos.length > 1 ? 's' : ''}</span>
+                            ` : ''}
+                        </div>
+                        <div class="chevron ${expandedToteId === tote.id ? 'rotated' : ''}" style="font-size: 24px;">⌄</div>
+                    </div>
+                    
+                    ${expandedToteId === tote.id ? `
+                        <div class="tote-expanded">
+                            ${tote.photos && tote.photos.length > 0 ? `
+                                <div class="tote-photos-grid">
+                                    ${tote.photos.map((photo, idx) => `
+                                        <div class="tote-photo" onclick="event.stopPropagation(); openLightbox('${photo}')">
+                                            <img src="${photo}" alt="Photo ${idx + 1}">
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            <div style="text-align: center;">
+                                <img src="${tote.qrCode}" alt="QR Code" class="qr-code">
+                                <div class="button-group">
+                                    <button class="btn btn-small" onclick="downloadQR('${tote.id}', event)">
+                                        ⬇️ Download QR Code
+                                    </button>
+                                    <button class="btn btn-small btn-danger" onclick="deleteTote('${tote.id}', event)">
+                                        🗑️ Delete Tote
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Toggle tote expansion
+        function toggleTote(toteId) {
+            if (expandedToteId === toteId) {
+                expandedToteId = null;
+            } else {
+                expandedToteId = toteId;
+            }
+            displayTotes();
+        }
+
+        // Download QR code
+        function downloadQR(toteId, event) {
+            event.stopPropagation();
+            const tote = totes.find(t => t.id === toteId);
+            if (tote) {
+                const link = document.createElement('a');
+                link.href = tote.qrCode;
+                link.download = `${tote.name.replace(/[^a-z0-9]/gi, '_')}_QR.png`;
+                link.click();
+            }
+        }
+
+        // Delete tote
+        function deleteTote(toteId, event) {
+            event.stopPropagation();
+            if (confirm('Are you sure you want to delete this tote?')) {
+                totes = totes.filter(t => t.id !== toteId);
+                saveTotesToStorage();
+                expandedToteId = null;
+                displayTotes();
+            }
+        }
+
+        // Search totes
+        function searchTotes() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (!searchTerm) {
+                displayTotes();
+                return;
+            }
+
+            const filtered = totes.filter(tote =>
+                tote.name.toLowerCase().includes(searchTerm) ||
+                tote.contents.toLowerCase().includes(searchTerm) ||
+                tote.location.toLowerCase().includes(searchTerm)
+            );
+
+            displayTotes(filtered);
+        }
+
+        // Open photo in lightbox
+        function openLightbox(photoSrc) {
+            document.getElementById('lightbox-img').src = photoSrc;
+            document.getElementById('lightbox').classList.add('show');
+        }
+
+        // Close lightbox
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('show');
+        }
+
+        // Load totes when page loads
+        window.onload = checkForToteParam;
+    </script>
+</body>
+</html>
